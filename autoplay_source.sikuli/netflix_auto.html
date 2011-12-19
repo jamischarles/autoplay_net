@@ -1,0 +1,140 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }  
+         
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>netflix_auto.sikuli</h2> <a href="netflix_auto.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="cmt">#setThrowException(False)
+</span>
+<span class="cmt">#function exit the script
+</span><span class="kw">def</span> exitScript(event):
+    <span class="skw">popup</span>(<span class="str">"You've managed to close Autoplay. Script will abort."</span>)
+
+    <span class="cmt">#kill the program (this is native python)
+</span>    <span class="kw">import</span> sys
+    sys.exit()
+
+<span class="cmt">#how often has next button been pressed?
+</span>counter = <span class="dig">0</span>
+
+<span class="cmt">#prompt user with input
+</span>numEpisodes = <span class="skw">input</span>(<span class="str">"How many more episodes should this run for? \nexample: 4     |     Press Ctrl + F1 to cancel."</span>)
+<span class="cmt">#default success message that will play after script ends successfully
+</span>popMessage = <span class="str">"Done auto-playing episodes!\n"</span> + str(counter) + <span class="str">" played."</span>
+
+
+
+<span class="cmt">#select a region
+</span>region = Screen().selectRegion(<span class="str">"Where should the mouse-pointer go after autoplaying?"</span>)
+
+<span class="cmt">#take a screenshot, then click that one
+</span><span class="cmt">#scrnShot = Screen(0).capture("take a screenshot")
+</span>
+
+<span class="cmt">#add key listener. Listen for this key combo to exit the script. 
+</span>Env.addHotkey(Key.F1, KeyModifier.ALT+KeyModifier.CTRL, exitScript)
+
+<span class="cmt">#loop through looking for the next for the # of times specified by user through input above
+</span><span class="kw">for</span> x <span class="kw">in</span> range(int(numEpisodes)):
+    <span class="cmt">#look for the button every 5 seconds (easier on CPU)
+</span>    <span class="kw">while</span> <span class="kw">not</span> (<img src="PlayNextEpis.png" />):
+        <span class="skw">wait</span>(<span class="dig">5</span>)
+
+    <span class="cmt">#Check for button existence (for 1 hr) 
+</span>    <span class="kw">if</span> exists(<img src="PlayNextEpis.png" />, <span class="dig">60</span> * <span class="dig">60</span> ):
+        <span class="skw">click</span>(exists(<img src="PlayNextEpis.png" />)) <span class="cmt">#(first click for focus)</span>
+        <span class="skw">wait</span>(<span class="dig">2</span>) <span class="cmt">#wait for load</span>
+        <span class="skw">click</span>(exists(<img src="PlayNextEpis.png" />)) <span class="cmt">#click again if still there (since we now certainly have focus)</span>
+
+        <span class="cmt">#increment the counter to show how many were played
+</span>        counter += <span class="dig">1</span>
+        <span class="cmt">#update play count here for how many episodes have played
+</span>        popMessage = <span class="str">"Done auto-playing episodes!\n"</span> + str(counter) + <span class="str">" episodes auto-played."</span>
+
+        <span class="kw">try</span>:
+            <span class="cmt">#move moouse to rest after clicking next episode. This was user selected earlier.
+</span>            mouseMove(region.getTopLeft()) <span class="cmt">#move to place selected</span>
+            <span class="cmt">#popup("found")
+</span>
+        <span class="kw">except</span>:
+            <span class="cmt">#upon failure to find a valid region specified, pop this up, before terminating the script.
+</span>            popMessage = <span class="str">"Region selected earlier was invalid. So mouse move didn't work.\n"</span> + str(counter) + <span class="str">" episodes autoplayed."</span>
+            <span class="cmt">#pass # we miss it
+</span>            <span class="cmt">#pass is just a placeholder.
+</span>
+    <span class="kw">else</span>:
+        popMessage = <span class="str">"Auto-play aborted! Next button wasn't found for 1 hour. \n"</span>
+        <span class="kw">break</span> <span class="cmt">#terminate the loop</span>
+
+
+<span class="cmt">#popup before script ends with success or failure message.
+</span><span class="skw">popup</span>(popMessage)
+</pre>
+</body>
+</html>
